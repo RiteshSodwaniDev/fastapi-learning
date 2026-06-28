@@ -6,9 +6,9 @@ from sqlalchemy.util import deprecated
 from jose import jwt,JWTError
 
 
-from database import SessionLocal
+from TodoApp.database import SessionLocal
 from pydantic import BaseModel, Field
-from models import Users
+from TodoApp.models import Users
 from passlib.context import CryptContext
 from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm,OAuth2PasswordBearer
