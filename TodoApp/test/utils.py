@@ -3,9 +3,10 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from fastapi.testclient import TestClient
 import pytest
-from TodoApp.models import Todos
+from TodoApp.models import Todos,Users
 from TodoApp.database import  Base
 from TodoApp.main import app
+from TodoApp.routers.auth import bcrypt_context
 
 SQLALCHEMY_DATABASE_URL="sqlite:///./testdb.db"
 
@@ -27,7 +28,8 @@ def override_get_db():
         db.close()
 
 def override_get_current_user():
-    return {'username':'riso0822','id':1,'user_role':'admin'}
+    print("OVERRIDE CALLED")
+    return {'username':'riso0822','id':1,'role':'admin'}
 
 client=TestClient(app)
 
@@ -47,4 +49,25 @@ def test_todo():
     yield todo
     with engine.connect() as connection:
         connection.execute(text("DELETE from todos"))
+        connection.commit()
+
+@pytest.fixture
+def test_user():
+    user=Users(
+        username="riso0822",
+        email="riteshsodwani@zohomail.in",
+        first_name="Ritesh",
+        last_name="Sodwani",
+        hashed_password=bcrypt_context.hash("testpassword"),
+        role="admin",
+        phone_number="(111)-111-1111"
+    )
+    db=TestingSessionLocal()
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    print(user.id)
+    yield user
+    with engine.connect() as connection:
+        connection.execute(text("DELETE FROM users;"))
         connection.commit()
